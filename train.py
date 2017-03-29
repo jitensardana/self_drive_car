@@ -1,0 +1,67 @@
+import numpy as np
+import glob
+import cv2
+
+print "Loading training data"
+load_time_start = cv2.getTickCount()
+
+image_array = np.zeros((1,38400))
+label_array = np.zeros((1,4),'float')
+training_data = glob.glob('training_data/*.npz')
+
+for single_npz in training_data:
+    with np.load(single_npz) as data:
+        print data.files
+        train_temp = data['train']
+        train_labels_temp = data['train_labels']
+        print train_temp.shape
+        print train_labels_temp.shape
+    image_array = np.vstack((image_array,train_temp))
+    label_array = np.vstack((label_array,train_labels_temp))
+
+train = image_array[1:,:]
+train_labels = label_array[1:,:]
+print train.shape
+print train_labels.shape
+
+load_time_end = cv2.getTickCount()
+load_time = (load_time_end - load_time_start)/ cv2.getTickFrequency()
+
+print 'Loading Time: ',load_time
+
+print "Training Started"
+train_time_start = cv2.getTickCount()
+
+# creating Neural Net
+layer_sizes = np.int32([38400 , 32, 4])
+model = cv2.ml.ANN_MLP_create()
+model.setLayerSizes(layer_sizes)
+model.setTrainMethod(cv2.ml.ANN_MLP_BACKPROP)
+criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS,500,0.0001)
+criteria2 = (cv2.TERM_CRITERIA_COUNT, 100,0.001)
+model.setTermCriteria(criteria)
+params = dict(term_crit = criteria,
+              train_method = cv2.ml.ANN_MLP_BACKPROP,
+              bp_dw_scale = 0.001,
+              bp_moment_scale = 0.0)
+
+print "Training MLP"
+
+num_iter = model.train(train,cv2.ml.ROW_SAMPLE,train_labels)
+train_time_end = cv2.getTickCount()
+train_time = (train_time_end - train_time_start) / cv2.getTickFrequency()
+print "Training Completed in: ", train_time
+
+model.save('mlp_xml/mlp.xml')
+
+print "Ran for %d iterations" %num_iter
+
+ret ,resp = model.predict(train)
+prediction = resp.argmax(-1)
+print "Prediction: ", prediction
+true_labels = train_labels.argmax(-1)
+
+print "Testing..."
+train_rate = np.mean(prediction == true_labels)
+print 'Train rate: %f:' % (train_rate*100)
+

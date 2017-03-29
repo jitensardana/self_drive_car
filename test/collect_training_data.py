@@ -49,15 +49,16 @@ class CollectTrainingData(object):
                     ret, frame = acf.read()
                     if ret:
                         cv2.imshow('feed',frame)
+                        cv2.waitkey(1)
 
                     image = cv2.GaussianBlur(frame, (5,5), 0)
                     #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                    image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
+                    #image = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
 
                     file_name = 'train'+str(number_pic)+'.jpg'
                     cv2.imwrite(file_name, image)
 
-                    image_temp = np.asarray(image) # copy image so that original does not get destroyed
+                    image_temp = np.asarray(frame) # copy image so that original does not get destroyed
 
                     total_frames += 1
                     number_pic += 1
