@@ -6,7 +6,7 @@ print "Loading training data"
 load_time_start = cv2.getTickCount()
 
 image_array = np.zeros((1,38400))
-label_array = np.zeros((1,4)).astype(np.float32)
+label_array = np.zeros((1,4),'float')
 training_data = glob.glob('training_data/*.npz')
 
 for single_npz in training_data:
@@ -33,13 +33,15 @@ print "Training Started"
 train_time_start = cv2.getTickCount()
 
 # creating Neural Net
-layer_sizes = np.int32([38400, 32, 4])
+layer_sizes = np.int32([38400, 72, 4])
 model = cv2.ml.ANN_MLP_create()
 model.setLayerSizes(layer_sizes)
 model.setTrainMethod(cv2.ml.ANN_MLP_BACKPROP)
 criteria = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS,500,0.0001)
 criteria2 = (cv2.TERM_CRITERIA_COUNT, 100,0.001)
 model.setTermCriteria(criteria)
+model.setBackpropWeightScale(0.001)
+model.setBackpropMomentumScale(0.0)
 params = dict(term_crit = criteria,
               train_method = cv2.ml.ANN_MLP_BACKPROP,
               bp_dw_scale = 0.001,
@@ -56,12 +58,5 @@ model.save('mlp_xml/mlp.xml')
 
 print "Ran for %d iterations" %num_iter
 
-ret, resp = model.predict(train.astype(np.float32))
-prediction = resp.argmax(-1)
-print "Prediction: ", prediction
-true_labels = train_labels.argmax(-1)
 
-print "Testing..."
-train_rate = np.mean(prediction == true_labels)
-print 'Train rate: %f:' % (train_rate*100)
 

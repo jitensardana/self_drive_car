@@ -56,9 +56,9 @@ class CollectTrainingData:
 
                         image = cv2.GaussianBlur(frame, (5, 5), 0)
                         #image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                        image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-                        file_name = 'train' + str(number_pic) + '.jpg'
-                        cv2.imwrite(file_name, image)
+                        #image = cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+                        file_name = 'test' + str(number_pic) + '.jpg'
+                        cv2.imwrite('testing_data/'+file_name, image)
 
                         roi = image[120:240, :]
                         # image_temp = np.asarray(image)  # copy image so that original does not get destroyed
@@ -71,8 +71,8 @@ class CollectTrainingData:
                         if event.type == pygame.KEYDOWN:
                             key_input = pygame.key.get_pressed()
                             number_pic += 1
-                            filename = 'train' + str(number_pic) + '.jpg'
-                            cv2.imwrite('training_images/' + filename, frame)
+                            filename = 'test' + str(number_pic) + '.jpg'
+                            cv2.imwrite('testing_images/' + filename, frame)
 
                             # complex orders
                             if key_input[pygame.K_UP] and key_input[pygame.K_RIGHT]:
@@ -132,8 +132,8 @@ class CollectTrainingData:
                 '''
                 train = image_array[1:, :]
                 train_labels = label_array[1:, :]
-                np.savez('training_data/training.npz', train=train, train_labels=train_labels)
-                print "Training Completed \n"
+                np.savez('testing_data/testing.npz', train=train, train_labels=train_labels)
+                print "Collection Completed \n"
                 print(train.shape)
                 print(train_labels.shape)
                 print "Total frames : ", total_frames
